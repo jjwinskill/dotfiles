@@ -1,13 +1,35 @@
 #!/bin/bash
 
-exec > >(tee -i $HOME/dotfiles_install.log)
-exec 2>&1
-set -x
+# Install zsh if it is not already installed
+if ! command -v zsh &> /dev/null
+then
+    echo "zsh not found, installing..."
+    sudo apt-get update
+    sudo apt-get install -y zsh
+fi
 
-ln -s $(pwd)/tmux.conf $HOME/.tmux.conf
-ln -s $(pwd)/vimrc $HOME/.vimrc
-ln -s $(pwd)/vim $HOME/.vim
-ln -s $(pwd)/emacs $HOME/.emacs
-ln -s $(pwd)/screenrc $HOME/.screenrc
+# Change the default shell to zsh
+chsh -s $(which zsh)
 
-vim -Es -u $HOME/.vimrc -c "PlugInstall | qa"
+# Symlink .zshrc from the dotfiles repository to the home directory
+ln -sf ~/dotfiles/.zshrc ~/.zshrc
+
+# Source the .zshrc file to apply the configuration
+source ~/.zshrc
+
+# Install VSCode extensions from extensions.txt
+if command -v code &> /dev/null
+then
+    echo "Installing VSCode extensions..."
+    while IFS= read -r extension; do
+        code --install-extension "$extension"
+    done < ~/dotfiles/vscode/extensions.txt
+else
+    echo "VSCode is not installed. Skipping extension installation."
+fi
+
+# Copy VSCode settings.json to the appropriate location
+mkdir -p ~/.config/Code/User/
+cp ~/dotfiles/vscode/settings.json ~/.config/Code/User/settings.json
+
+echo "Setup complete!"
