@@ -1,52 +1,57 @@
-# Path to your oh-my-zsh installation
-export ZSH="$HOME/.oh-my-zsh"
+#!/bin/sh
 
-# Set theme to powerlevel10k if installed, else use default
-if [ -d "$ZSH/custom/themes/powerlevel10k" ]; then
-  ZSH_THEME="powerlevel10k/powerlevel10k"
-else
-  ZSH_THEME="robbyrussell"
-fi
-
-# Enable plugins
-plugins=(git)
-
-# Source oh-my-zsh
-source $ZSH/oh-my-zsh.sh
-
-# Custom theme settings for Synth '84
-function prompt_git_branch {
-  git branch 2>/dev/null | grep '*' | sed 's/* //'
+zshrc() {
+    echo "==========================================================="
+    echo "             cloning zsh-autosuggestions                   "
+    echo "-----------------------------------------------------------"
+    git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+    echo "==========================================================="
+    echo "             cloning zsh-syntax-highlighting               "
+    echo "-----------------------------------------------------------"
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+    echo "==========================================================="
+    echo "             cloning powerlevel10k                         "
+    echo "-----------------------------------------------------------"
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+    echo "==========================================================="
+    echo "             import zshrc                                  "
+    echo "-----------------------------------------------------------"
+    cat .zshrc > $HOME/.zshrc
+    echo "==========================================================="
+    echo "             import powerlevel10k                          "
+    echo "-----------------------------------------------------------"
+    cat .p10k.zsh > $HOME/.p10k.zsh
 }
 
-PROMPT='%{$fg[cyan]%}%n@%m %{$fg[magenta]%}%~ %{$fg[green]%}$(prompt_git_branch)%{$reset_color%} %# '
+# change time zone
+sudo ln -fs /usr/share/zoneinfo/America/Chicago /etc/localtime
+sudo dpkg-reconfigure --frontend noninteractive tzdata
 
-alias st='git status'
-alias ad='git add'
-alias ct='git commit'
-alias cta='git commit --amend'
-alias pu='git push'
-alias pl='git pull'
-alias co='git checkout'
-alias br='git branch'
-alias df='git diff'
-alias dfs='git diff --staged'
-alias dfc='git diff --cached'
-alias mr='git merge'
-alias rb='git rebase'
-alias sta='git stash'
-alias staa='git stash apply'
-alias pfo='git push --force-with-lease'
+zshrc
 
-# Tab-completion for git branch names
-if [[ $commands[git] ]]; then
-  __git_complete gco _git_checkout
-  __git_complete gb _git_branch
-fi
+# make directly highlighting readable - needs to be after zshrc line
+echo "" >> ~/.zshrc
+echo "# remove ls and directory completion highlight color" >> ~/.zshrc
+echo "_ls_colors=':ow=01;33'" >> ~/.zshrc
+echo 'zstyle ":completion:*:default" list-colors "${(s.:.)_ls_colors}"' >> ~/.zshrc
+echo 'LS_COLORS+=$_ls_colors' >> ~/.zshrc
 
-# Other environment settings
-export PATH=$HOME/bin:/usr/local/bin:$PATH
-export EDITOR='code --wait'
-
-# Apply the color scheme
-autoload -U colors && colors
+# set gitconfig defaults
+git config --global push.autoSetupRemote true
+git config --global core.editor "code --wait"
+git config --global alias.st status
+git config --global alias.ad add
+git config --global alias.ct commit
+git config --global alias.cta 'commit --amend'
+git config --global alias.pu push
+git config --global alias.pl pull
+git config --global alias.co checkout
+git config --global alias.br branch
+git config --global alias.df diff
+git config --global alias.dfs 'diff --staged'
+git config --global alias.dfc 'diff --cached'
+git config --global alias.mr merge
+git config --global alias.rb rebase
+git config --global alias.sta stash
+git config --global alias.staa 'stash apply'
+git config --global alias.pfo 'push --force-with-lease'
