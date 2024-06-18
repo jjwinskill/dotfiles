@@ -10,14 +10,6 @@ fi
 
 echo "We spared no expense"
 
-# Ensure Zsh is the default shell
-if [ "$SHELL" != "$(which zsh)" ]; then
-  echo "Changing default shell to Zsh..."
-  chsh -s $(which zsh)
-fi
-
-echo "We have a t-rex"
-
 # Install powerlevel10k theme if not already installed
 if [ ! -d "$HOME/.oh-my-zsh/custom/themes/powerlevel10k" ]; then
   echo "Installing Powerlevel10k theme..."
