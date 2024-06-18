@@ -37,7 +37,7 @@ alias mr='git merge'
 alias rb='git rebase'
 alias sta='git stash'
 alias staa='git stash apply'
-aleas pfo='git push --force-with-lease'
+alias pfo='git push --force-with-lease'
 
 # Tab-completion for git branch names
 if [[ $commands[git] ]]; then
