@@ -1,30 +1,52 @@
-#!/bin/bash
+# Path to your oh-my-zsh installation
+export ZSH="$HOME/.oh-my-zsh"
 
-echo "Oh hello Josh"
-
-# Install oh-my-zsh if not already installed
-if [ ! -d "$HOME/.oh-my-zsh" ]; then
-  echo "Installing Oh My Zsh..."
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+# Set theme to powerlevel10k if installed, else use default
+if [ -d "$ZSH/custom/themes/powerlevel10k" ]; then
+  ZSH_THEME="powerlevel10k/powerlevel10k"
+else
+  ZSH_THEME="robbyrussell"
 fi
 
-echo "We spared no expense"
+# Enable plugins
+plugins=(git)
 
-# Install powerlevel10k theme if not already installed
-if [ ! -d "$HOME/.oh-my-zsh/custom/themes/powerlevel10k" ]; then
-  echo "Installing Powerlevel10k theme..."
-  git clone --depth=1 https://github.com/romkatv/powerlevel10k.git $HOME/.oh-my-zsh/custom/themes/powerlevel10k
+# Source oh-my-zsh
+source $ZSH/oh-my-zsh.sh
+
+# Custom theme settings for Synth '84
+function prompt_git_branch {
+  git branch 2>/dev/null | grep '*' | sed 's/* //'
+}
+
+PROMPT='%{$fg[cyan]%}%n@%m %{$fg[magenta]%}%~ %{$fg[green]%}$(prompt_git_branch)%{$reset_color%} %# '
+
+alias st='git status'
+alias ad='git add'
+alias ct='git commit'
+alias cta='git commit --amend'
+alias pu='git push'
+alias pl='git pull'
+alias co='git checkout'
+alias br='git branch'
+alias df='git diff'
+alias dfs='git diff --staged'
+alias dfc='git diff --cached'
+alias mr='git merge'
+alias rb='git rebase'
+alias sta='git stash'
+alias staa='git stash apply'
+alias pfo='git push --force-with-lease'
+
+# Tab-completion for git branch names
+if [[ $commands[git] ]]; then
+  __git_complete gco _git_checkout
+  __git_complete gb _git_branch
 fi
 
-echo "Dino DNA"
+# Other environment settings
+export PATH=$HOME/bin:/usr/local/bin:$PATH
+export EDITOR='code --wait'
 
-# Ensure .zshrc exists and source it
-if [ ! -f "$HOME/.zshrc" ]; then
-  echo "Creating .zshrc file..."
-  touch $HOME/.zshrc
-fi
-
-echo "Sourcing .zshrc to apply changes..."
-source "$HOME/.zshrc"
-
-echo "Hold on to your butts..."
+# Apply the color scheme
+autoload -U colors && colors
