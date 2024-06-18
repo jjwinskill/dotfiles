@@ -9,16 +9,17 @@ fi
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-export ZSH="${HOME}/.oh-my-zsh"
+export ZSH="$HOME/.oh-my-zsh"
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="devcontainers"
+# ZSH_THEME="robbyrussell"
+ZSH_THEME="powerlevel10k/powerlevel10k"
 
 # Set list of themes to pick from when loading at random
-# Setting this variable when ZSH_THEME="devcontainers"
+# Setting this variable when ZSH_THEME=random will cause zsh to load
 # a theme from this variable instead of looking in $ZSH/themes/
 # If set to an empty array, this variable will have no effect.
 # ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
@@ -33,7 +34,7 @@ ZSH_THEME="devcontainers"
 # Uncomment one of the following lines to change the auto-update behavior
 # zstyle ':omz:update' mode disabled  # disable automatic updates
 # zstyle ':omz:update' mode auto      # update automatically without asking
-# zstyle ':omz:update' mode reminder  # just remind me to update when it's time
+zstyle ':omz:update' mode reminder  # just remind me to update when it's time
 
 # Uncomment the following line to change how often to auto-update (in days).
 # zstyle ':omz:update' frequency 13
@@ -77,13 +78,21 @@ ZSH_THEME="devcontainers"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
+# plugins=(git)
+plugins=(
+  git
+  zsh-autosuggestions
+  zsh-syntax-highlighting
+  # dotenv
+)
 
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
 
 # export MANPATH="/usr/local/man:$MANPATH"
+
+export PATH="$HOME/go/bin/:$PATH"
 
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
@@ -106,8 +115,42 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-DISABLE_AUTO_UPDATE=true
-DISABLE_UPDATE_PROMPT=true
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# added by terraform -install-autocomplete
+autoload -U +X bashcompinit && bashcompinit
+complete -o nospace -C /opt/homebrew/bin/terraform terraform
+eval "$(github-copilot-cli alias -- "$0")"
+
+# used for gh cli auto completion
+# see: https://cli.github.com/manual/gh_completion
+[[ -d ~/.oh-my-zsh/completions ]] || mkdir ~/.oh-my-zsh/completions
+gh completion -s zsh > ~/.oh-my-zsh/completions/_gh
+autoload -U compinit
+compinit -i
+
+# command output behavior - send output to terminal
+# see: https://superuser.com/questions/1698521/zsh-keep-all-command-outputs-on-terminal-screen
+export PAGER=""
+
+# History settings
+HISTSIZE=500000
+SAVEHIST=500000
+# Do not put commands in history if they begin with a SPACE
+setopt HIST_IGNORE_SPACE
+# Trim excessive whitespace from commands before adding to history
+setopt HIST_REDUCE_BLANKS
+# Expire duplicate entries first when trimming history
+# setopt HIST_EXPIRE_DUPS_FIRST
+
+# Function: Deletes most recent line of history
+# cannot be ran twice in a row (only once, otherwise it deletes 2 lines)
+hrm() {
+  ed -s ~/.zsh_history <<< $'-1,$d\nwq'
+  # sed -i '' '$d' ~/.zsh_history # you need it to run twice the first time...
+}
+
+# use homebrew ruby if not on Codespaces
+if [ $(whoami) != "codespace" ]; then export PATH="/opt/homebrew/opt/ruby/bin:$PATH"; fi
