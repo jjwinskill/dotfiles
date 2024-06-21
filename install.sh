@@ -51,3 +51,42 @@ git config --global alias.rb rebase
 git config --global alias.sta stash
 git config --global alias.staa 'stash apply'
 git config --global alias.pfo 'push --force-with-lease'
+
+#!/bin/zsh
+
+# Don't track vscode settings.json file in git locally
+git update-index --skip-worktree .vscode/settings.json
+
+# Path to the settings.json file
+file_path=".vscode/settings.json"
+
+# Temporary file
+temp_file=$(mktemp)
+
+# awk script to replace the content between { and } for the [ruby] key
+awk '
+BEGIN { print_mode = 1 }
+/"\[ruby\]": \{/ {
+    print "    \"[ruby]\": {"
+    print "        \"editor.defaultFormatter\": \"rubocop.vscode-rubocop\","
+    print "        \"editor.formatOnSave\": true,"
+
+    print_mode = 0
+    next
+    }
+/},/ {
+    if (print_mode == 0) {
+        print_mode = 1
+        print "    },"
+        print "    \"rubocop.commandPath\": \"bin/rubocop\","
+        next
+    }
+}
+print_mode { print }
+' "$file_path" > "$temp_file"
+
+# Move the temporary file to the original file path
+mv "$temp_file" "$file_path"
+
+echo "settings modified successfully"
+
