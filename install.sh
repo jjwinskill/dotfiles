@@ -52,8 +52,6 @@ git config --global alias.sta stash
 git config --global alias.staa 'stash apply'
 git config --global alias.pfo 'push --force-with-lease'
 
-#!/bin/zsh
-
 # Don't track vscode settings.json file in git locally
 git update-index --skip-worktree .vscode/settings.json
 
